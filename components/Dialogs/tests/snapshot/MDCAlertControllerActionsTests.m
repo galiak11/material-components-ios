@@ -14,6 +14,7 @@
 
 #import "MaterialSnapshot.h"
 
+#import "MDCAlertController+ButtonForAction.h"
 #import "MDCAlertControllerView+Private.h"
 #import "MaterialContainerScheme.h"
 #import "MaterialDialogs+Theming.h"
@@ -75,7 +76,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
   [self changeViewToRTL:alertController.view];
 }
 
-#pragma mark - Tests
+#pragma mark - Actions Layout Tests
 
 // Horizontal Layout | Low Emphasis | Default Alignment (trailing)
 - (void)testLowEmphasisActionsOrderInHorizontalLayout {
@@ -201,13 +202,39 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
   [self generateSnapshotAndVerifyForView:self.alertController.view];
 }
 
+// Verify correct layout for issues reported in:
+//    https://github.com/material-components/material-components-ios/issues/8434.
+- (void)testActionsLayoutHorizontallyForCatpitalizedButtonCase {
+  // Given
+  self.alertController.title = @"Recurring Action";
+  self.alertController.message = nil;
+  [self addLowEmphasisAction:@"This Event"];
+  [self addLowEmphasisAction:@"This and all following events"];
+  [self addLowEmphasisAction:@"All Events"];
+  [self addLowEmphasisAction:@"Cancel"];
+
+  // When
+  [self.alertController applyThemeWithScheme:self.containerScheme2019];
+  for (MDCAlertAction *action in self.alertController.actions) {
+    MDCButton *button = [self.alertController buttonForAction:action];
+    button.uppercaseTitle = NO;
+  }
+
+  // Then
+  // Ensure all actions fit in snapshot view.
+  CGSize preferredContentSize = self.alertController.preferredContentSize;
+  self.alertController.view.bounds =
+      CGRectMake(0.f, 0.f, preferredContentSize.width, preferredContentSize.height);
+  [self generateSnapshotAndVerifyForView:self.alertController.view];
+}
+
 #pragma mark - Alignment Tests
 
 // Horizontal Layout | Low Emphasis | Center Alignment
 - (void)testLowEmphasisActionsAreCenteredInHorizontalLayout {
   // Given
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:NO];
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:YES];
+  [self addOKActionWithEmphasis:MDCActionEmphasisLow];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisLow];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -221,8 +248,8 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 // Horizontal Layout | Low Emphasis | Leading Alignment
 - (void)testLowEmphasisActionsAreLeadingInHorizontalLayout {
   // Given
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:NO];
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:YES];
+  [self addOKActionWithEmphasis:MDCActionEmphasisLow];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisLow];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -236,8 +263,8 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 // Horizontal Layout | Low Emphasis | Justified Alignment
 - (void)testLowEmphasisActionsAreJustifiedInHorizontalLayout {
   // Given
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:NO];
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:YES];
+  [self addOKActionWithEmphasis:MDCActionEmphasisLow];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisLow];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -251,8 +278,8 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 // Horizontal Layout | Medium Emphasis | Center Alignment
 - (void)testMediumEmphasisActionsAreCenteredInHorizontalLayout {
   // Given
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:NO];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addOKActionWithEmphasis:MDCActionEmphasisMedium];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -266,8 +293,8 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 // Horizontal Layout | Medium Emphasis | Leading Alignment
 - (void)testMediumEmphasisActionsAreLeadingInHorizontalLayout {
   // Given
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:NO];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addOKActionWithEmphasis:MDCActionEmphasisMedium];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -281,8 +308,8 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 // Horizontal Layout | Medium Emphasis | Justified Alignment
 - (void)testMediumEmphasisActionsAreJustifiedInHorizontalLayout {
   // Given
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:NO];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addOKActionWithEmphasis:MDCActionEmphasisMedium];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -297,7 +324,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testLowEmphasisActionsAreTrailingInVerticalLayout {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisLow];
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisLow];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -312,7 +339,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testLowEmphasisActionsAreLeadingInVerticalLayout {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisLow];
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisLow];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -327,7 +354,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testLowEmphasisActionsAreJustifiedInVerticalLayout {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisLow];
-  [self addShortActionWithEmphasis:MDCActionEmphasisLow cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisLow];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -342,7 +369,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testMediumEmphasisActionsAreTrailingInVerticalLayout {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisMedium];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -357,7 +384,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testMediumEmphasisActionsAreLeadingInVerticalLayout {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisMedium];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -372,7 +399,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testMediumEmphasisActionsAreJustifiedInVerticalLayout {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisMedium];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -388,7 +415,7 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
 - (void)testActionsAreOrderedByEmphasis {
   // Given
   [self addFirstLongActionWithEmphasis:MDCActionEmphasisHigh];
-  [self addShortActionWithEmphasis:MDCActionEmphasisMedium cancelAction:YES];
+  [self addCancelActionWithEmphasis:MDCActionEmphasisMedium];
   [self.alertController applyThemeWithScheme:self.containerScheme2019];
 
   // When
@@ -407,11 +434,19 @@ static NSString *const kSecondLongAction = @"Second Long Long Action";
                                                           handler:nil]];
 }
 
-- (void)addShortActionWithEmphasis:(MDCActionEmphasis)emphasis cancelAction:(BOOL)cancelAction {
-  NSString *title = cancelAction ? @"Cancel" : @"OK";
-  [self.alertController addAction:[MDCAlertAction actionWithTitle:title
-                                                         emphasis:emphasis
-                                                          handler:nil]];
+- (void)addOKActionWithEmphasis:(MDCActionEmphasis)emphasis {
+  [self.alertController
+      addAction:[MDCAlertAction actionWithTitle:@"OK" emphasis:emphasis handler:nil]];
+}
+
+- (void)addCancelActionWithEmphasis:(MDCActionEmphasis)emphasis {
+  [self.alertController
+      addAction:[MDCAlertAction actionWithTitle:@"Cancel" emphasis:emphasis handler:nil]];
+}
+
+- (void)addLowEmphasisAction:(NSString *)action {
+  [self.alertController
+      addAction:[MDCAlertAction actionWithTitle:action emphasis:MDCActionEmphasisLow handler:nil]];
 }
 
 @end
